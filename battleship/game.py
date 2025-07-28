@@ -1,14 +1,3 @@
-'''
-Sophia Zhang and Mia Liu
-snapshot #1: targetboard class done, placeship method in oceanboard class done
-snapshot #2: fixed placeship, rest of oceanboard done, placeship in battleshipplayer done
-snapshot #3: completed ship, display, and battleshipplayer classes, made edits to rest of code, started game.py
-snapshot #4: complete game class, fixed bugs in other classes. game is playble.
-snapshot #5: fixed a few more bugs, added shipAt function
-snapshot #6: fixed more bugs in ship class and battleshipplayer class
-snapshot #7: final version
-'''
-
 from battleshipplayer import BattleshipPlayer
 from ship import Ship
 from display import Display
