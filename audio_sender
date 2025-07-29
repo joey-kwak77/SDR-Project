@@ -1,0 +1,35 @@
+import numpy as np
+import sounddevice as sd
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+# Settings
+fs = 44100           # Sample rate
+chunk = 1024         # Samples per frame
+
+# Create figure for plotting
+fig, ax = plt.subplots()
+x = np.arange(0, chunk)
+line, = ax.plot(x, np.zeros(chunk))
+ax.set_ylim(-1, 1)
+ax.set_xlim(0, chunk)
+ax.set_title("Live Microphone Input")
+ax.set_xlabel("Samples")
+ax.set_ylabel("Amplitude")
+
+# Callback to update plot
+def audio_callback(indata, frames, time, status):
+    if status:
+        print(status)
+    line.set_ydata(indata[:, 0])
+    return line,
+
+# Stream and animate
+def update_plot(frame):
+    return line,
+
+stream = sd.InputStream(callback=audio_callback, channels=1, samplerate=fs, blocksize=chunk)
+ani = animation.FuncAnimation(fig, update_plot, interval=30)
+
+with stream:
+    plt.show()
