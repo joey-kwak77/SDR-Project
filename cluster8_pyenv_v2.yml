@@ -1,0 +1,21 @@
+name: cluster8_pyenv
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.13
+  - libiio           # C library + CLI tools (iio_info, iio_attr)
+  - pyadi-iio        # High-level Python API for ADI IIO devices
+  - libusb           # Cross-platform USB support
+  - notebook         # Classic Jupyter Notebook interface
+  - jupyterlab       # Next-generation Jupyter interface
+  - pip
+
+  - pip:
+    - ipykernel      # Kernel connector for Jupyter
+    - scipy
+    - numpy
+    - matplotlib
+    - galois
+    - cosmos2025
