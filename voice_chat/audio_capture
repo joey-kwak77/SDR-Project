@@ -43,11 +43,29 @@ def audio_callback(indata, frames, time, status):
 def update_plot(frame):
     raw_line.set_ydata(buffer)
     quant_line.set_ydata(quantize(buffer, levels))
-    return raw_line, quant_line
 
+    # Don't transmit if muted (buffer is all zeros)
+    if not np.any(buffer):  # True if all elements are 0 (i.e., silence)
+        return raw_line, quant_line
+
+    # Quantize
+    quantized = quantize(buffer, levels)
+
+    # Convert to integer (0–255)
+    int_levels = ((quantized + 1) / 2 * (levels - 1)).astype(int)
+
+    # Convert to bits (only print first 20 samples)
+    bit_strings = []
+    for val in int_levels[:10]:
+        bit_str = format(val, '08b')  # Convert integer to 8-bit binary string
+        bit_strings.append(bit_str)    
+    print("Bits:", ' '.join(bit_strings))
+ 
+    return raw_line, quant_line 
 # Start stream
 stream = sd.InputStream(callback=audio_callback, channels=1, samplerate=fs, blocksize=chunk)
-ani = animation.FuncAnimation(fig, update_plot, interval=30)
+ani = animation.FuncAnimation(fig, update_plot, interval=10)
 
 with stream:
     plt.show()
+
