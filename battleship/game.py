@@ -2,7 +2,9 @@ from battleshipplayer import BattleshipPlayer
 from ship import Ship
 from display import Display
 from setting import Setting
-from letter import Letter
+from comms_lib.pluto import Pluto
+from PAM import Pam
+import numpy as np
 
 '''
 Places the 5 ships onto the Ocean board of 'player'
@@ -42,7 +44,7 @@ def convertLoc(loc: str):
     return (r, c)
 
 
-def turn(d: Display, p1: BattleshipPlayer, p2: BattleshipPlayer, playerNumber: int, message = "") -> bool:
+def turn(d: Display, p1: BattleshipPlayer, p2: BattleshipPlayer, playerNumber: int, pam: Pam, sdr: Pluto, message = "") -> bool:    #
 
     if playerNumber == 0:
         p = p1
@@ -54,11 +56,38 @@ def turn(d: Display, p1: BattleshipPlayer, p2: BattleshipPlayer, playerNumber: i
     while True: # check for valid grid
         res = convertLoc(input("{}, which grid are you shooting? ".format(p.name)))
         if res:
-            r, c = res # unpacking into row and column
+            r1, c1 = res # unpacking into row and column
             break
         else:
             d.message("invalid grid")
         
+
+
+    '''
+    TODO: implement signal sending here
+
+    '''
+
+    symbols = pam.create_symbol(r1, c1)
+    signal = pam.create_message(symbols, 10) # creating the message (signal)
+    sdr.tx(signal)  # sending signal
+    
+    m1 = pam.decode_message(sdr.rx(), 10, 16)
+
+    # # Corrept the symbols
+    # signal = (
+    # signal
+    # + np.random.normal(0, 0.1, signal.shape)
+    # + 1j * np.random.normal(0, 0.1, signal.shape)
+    # )
+    # m1 = pam.decode_message(signal, 10, 16)
+
+
+    symb = pam.detect_pam_symbol(16, m1)
+    r, c = pam.get_loc(symb)
+
+
+
     # if already hit (don't get to hit again because you are dumb)
     if p.target.getPiece(r, c) != None:
         print("You already hit that...")
@@ -127,9 +156,18 @@ def playBattleship(d: Display, settings: Setting) -> None:
     d.clearScreen()
     d.displayUnits(p1, p2)
 
+    p = Pam()
+
+    # init pluto
+    sample_rate = 1e6  # baseband sampling rate (samples per second)
+    sdr = Pluto("usb:1.1.5")
+    sdr.carrier_frequency = 750e6  # Set carrier frequency for transmission and reception       815 prev.
+    sdr.sample_rate = int(sample_rate)  # Set baseband sampling rate of Pluto
+
+
     # take turns between player 1 and 2 until one player sinks the other's ships
     turns = 0
-    while not turn(d, p1, p2, turns%2):
+    while not turn(d, p1, p2, turns%2, p):
         turns += 1
 
     d.clearScreen()
@@ -155,7 +193,9 @@ def playBattleship(d: Display, settings: Setting) -> None:
         d.displayUnits(p1, p2)
 
         turns = 0
-        while not turn(d, p1, p2, turns%2):
+        while not turn(d, p1, p2, turns%2, sdr):
+        # while not turn(d, p1, p2, turns%2):
+
             turns += 1
 
         d.clearScreen()
