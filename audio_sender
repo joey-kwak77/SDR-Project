@@ -2,32 +2,50 @@ import numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import keyboard 
 
 # Settings
-fs = 44100           # Sample rate
-chunk = 1024         # Samples per frame
+fs = 44100          # Sample rate
+chunk = 1024        # Samples per frame
+bits = 8            # Bits for ADC
+levels = 2**bits    # Quantization levels
 
 # Create figure for plotting
 fig, ax = plt.subplots()
 x = np.arange(0, chunk)
-line, = ax.plot(x, np.zeros(chunk))
+raw_line, = ax.plot(x, np.zeros(chunk), label="Raw")
+quant_line, = ax.plot(x, np.zeros(chunk), label="Quantized", linestyle='dashed')
 ax.set_ylim(-1, 1)
 ax.set_xlim(0, chunk)
-ax.set_title("Live Microphone Input")
+ax.set_title("Live Mic Input")
 ax.set_xlabel("Samples")
 ax.set_ylabel("Amplitude")
+ax.legend()
 
-# Callback to update plot
+# Shared buffer for animation
+buffer = np.zeros(chunk)
+
+# ADC Quantization
+def quantize(signal, levels):
+    return np.round(signal * (levels // 2 - 1)) / (levels // 2 - 1)
+
+# Callback: fills buffer with live input
 def audio_callback(indata, frames, time, status):
+    global buffer
     if status:
         print(status)
-    line.set_ydata(indata[:, 0])
-    return line,
+    if keyboard.is_pressed('space'):  # Push-to-talk key
+        buffer = indata[:, 0]
+    else:
+        buffer[:] = 0  # Silence
 
-# Stream and animate
+# Update the animation frame
 def update_plot(frame):
-    return line,
+    raw_line.set_ydata(buffer)
+    quant_line.set_ydata(quantize(buffer, levels))
+    return raw_line, quant_line
 
+# Start stream
 stream = sd.InputStream(callback=audio_callback, channels=1, samplerate=fs, blocksize=chunk)
 ani = animation.FuncAnimation(fig, update_plot, interval=30)
 
