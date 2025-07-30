@@ -6,7 +6,7 @@ import keyboard
 
 # Settings
 fs = 44100          # Sample rate
-chunk = 1024        # Samples per frame
+chunk = 1024       # Samples per frame
 bits = 8            # Bits for ADC
 levels = 2**bits    # Quantization levels
 
@@ -38,6 +38,8 @@ def audio_callback(indata, frames, time, status):
         buffer = indata[:, 0]
     else:
         buffer[:] = 0  # Silence
+    bit_strs = audio_to_bits(buffer, levels,10)
+    print("Bits:", ' '.join(bit_strs[:10]))
 
 # Update the animation frame
 def update_plot(frame):
@@ -47,7 +49,10 @@ def update_plot(frame):
     # Don't transmit if muted (buffer is all zeros)
     if not np.any(buffer):  # True if all elements are 0 (i.e., silence)
         return raw_line, quant_line
+ 
+    return raw_line, quant_line
 
+def audio_to_bits(buffer, levels, num_samples):
     # Quantize
     quantized = quantize(buffer, levels)
 
@@ -56,12 +61,14 @@ def update_plot(frame):
 
     # Convert to bits (only print first 20 samples)
     bit_strings = []
-    for val in int_levels[:10]:
+    for val in int_levels[:num_samples]:
         bit_str = format(val, '08b')  # Convert integer to 8-bit binary string
         bit_strings.append(bit_str)    
-    print("Bits:", ' '.join(bit_strings))
- 
-    return raw_line, quant_line 
+    
+
+    return bit_strings
+
+
 # Start stream
 stream = sd.InputStream(callback=audio_callback, channels=1, samplerate=fs, blocksize=chunk)
 ani = animation.FuncAnimation(fig, update_plot, interval=10)
