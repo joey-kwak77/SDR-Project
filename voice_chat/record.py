@@ -198,4 +198,3 @@ if not (b == bit_array):
 shift bits to create voice changer effect
 convert bits back to audio
 '''
-
