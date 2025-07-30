@@ -1,4 +1,4 @@
-import keyboard as kb
+from pynput import keyboard as kb
 import threading, queue, numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt

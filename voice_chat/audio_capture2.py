@@ -56,12 +56,13 @@ def audio_callback(indata, frames, time, status):
         print(status)
     if talk.is_set():            # mute unless space pressed
         buffer = indata[:, 0]
+        bit_strs = audio_to_bits(buffer, levels,10)
+        print("Bits:", ' '.join(bit_strs[:10]))
     else:
         buffer[:] = 0
 
 
-    bit_strs = audio_to_bits(buffer, levels,10)
-    print("Bits:", ' '.join(bit_strs[:10]))
+    
 
 # Update the animation frame
 def update_plot(frame):

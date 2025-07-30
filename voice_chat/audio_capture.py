@@ -36,10 +36,12 @@ def audio_callback(indata, frames, time, status):
         print(status)
     if keyboard.is_pressed('space'):  # Push-to-talk key
         buffer = indata[:, 0]
+        bit_strs = audio_to_bits(buffer, levels,10)
+        print("Bits:", ' '.join(bit_strs[:10]))
     else:
-        buffer[:] = 0  # Silence
-    bit_strs = audio_to_bits(buffer, levels,10)
-    print("Bits:", ' '.join(bit_strs[:10]))
+        buffer[:] = 0  # Silence 
+
+    
 
 # Update the animation frame
 def update_plot(frame):
@@ -75,4 +77,3 @@ ani = animation.FuncAnimation(fig, update_plot, interval=10)
 
 with stream:
     plt.show()
-
