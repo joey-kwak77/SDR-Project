@@ -161,40 +161,47 @@ convert symbols back to bits
 
 # sdr stuff ew
 
-
-'''
-# Pluto stuff
-sdr.tx(m)
-
-rx_signal = sdr.rx()  # Capture raw samples from Pluto
-
-'''
-# system.transmit_signal(transmit_signal)
-
-# receive_signal = system.receive_signal()
-
-# simulating noise
-receive_signal = (
-    transmit_signal
-    + np.random.normal(0, 0.1, transmit_signal.shape)
-    + 1j * np.random.normal(0, 0.1, transmit_signal.shape)
-)
+receive_signal = transmit_signal # change later
 
 
 s = P.decode_message(receive_signal, sps, N)
 s = P.detect_pam_symbol(N, s)
 b = P.symbol_to_bits(N, s)
 
-# debugging
-print(b == bit_array)
-if not (b == bit_array):
-    for i in range(len(b)):
-        if (b[i] != bit_array[i]):
-            print (str(i) + ": ", str(b[i]), str(bit_array[i]))
-
 
 
 '''
 shift bits to create voice changer effect
 convert bits back to audio
+apply low pass filter to reduce noise in the audio
 '''
+
+def bits_to_audio(bit_array, levels):
+    # Convert each 8-bit string back to int
+    int_levels = np.array([int(b, 2) for b in bit_array], dtype=np.int32)
+
+    # Map from [0, 255] → [-1, 1] (inverse of quantization step)
+    audio = (int_levels / (levels - 1)) * 2 - 1
+
+    return audio.astype(np.float32)
+
+
+from scipy.signal import butter, lfilter
+
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    nyq = 0.5 * fs  # Nyquist Frequency
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return lfilter(b, a, data)
+
+
+levels = 256  # bits = 8
+reconstructed_audio = bits_to_audio(b, levels) 
+
+cutoff_freq = 4000  # for speech, 3–4 kHz is usually sufficient
+filtered_audio = butter_lowpass_filter(reconstructed_audio, cutoff=cutoff_freq, fs=44100)
+
+
+# Playback the audio
+sd.play(filtered_audio, samplerate=44100)
+sd.wait()
