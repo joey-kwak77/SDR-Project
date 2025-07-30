@@ -10,7 +10,7 @@ class Pam:
         Generate a PAM constellation diagram for N levels. The average power of the constellation must be 1.
 
         Parameters:
-        N (int): Number of PAM levels.
+        N (int): Number of PAM levels.          should be 4!!
 
         Returns:
         list: A list of PAM levels.
@@ -34,7 +34,7 @@ class Pam:
 
         Parameters:
         bits (list): a list of bits representing the audio recording
-        N (int): Number of PAM levels.
+        N (int): Number of PAM levels.          should be 4!!
 
         Returns:
         res (list): a list of symbols each 8 bits map to
@@ -43,10 +43,15 @@ class Pam:
         cons = self.pam_constallation(N)
         res = []
         for num in bits:
-            n1 = num[:len(num)//2]
-            n2 = num[len(num)//2:]
+            n1 = num[:len(num)//4]
+            n2 = num[len(num)//4:len(num)//2]
+            n3 = num[len(num)//2:(len(num)//4) *3]
+            n4 = num[(len(num)//4)*3:]
+
             res.append(float(cons[int(n1, 2)]))
             res.append(float(cons[int(n2, 2)]))
+            res.append(float(cons[int(n3, 2)]))
+            res.append(float(cons[int(n4, 2)]))
 
         return res
 
@@ -67,7 +72,7 @@ class Pam:
         Parameters:
         m: message
         K: number of repeats in m
-        N: number of PAM levels
+        N (int): Number of PAM levels.          should be 4!!
 
         Returns:
         symb: the symbols decoded
@@ -86,7 +91,7 @@ class Pam:
         Detect the PAM symbol from a received symbol.
 
         Parameters:
-        N (int): Number of PAM levels.
+        N (int): Number of PAM levels.          should be 4!!
         received_symbol (complex): The received symbol to be detected.
 
         Returns:
@@ -106,7 +111,7 @@ class Pam:
     def symbol_to_bits(self, N, symbols):
         '''
         Parameters:
-        N (int): Number of PAM levels.
+        N (int): Number of PAM levels.          should be 4!!
         symbols: recieved symbols
 
         Returns:
@@ -117,12 +122,16 @@ class Pam:
         M = 2**L
         cons = self.pam_constallation(N)
         res = []
+        i = 0
         for s in symbols:
-            num = ""
+            if i % 4 == 0:
+                num = ""
             j = np.where(cons == s)[0][0]
             b = bin(j)[2:]
             l = L - len(b)
             num += zeros[:l]
             num += b
-            res.append(num)
+            if i % 4 == 3:
+                res.append(num)
+            i += 1
         return res

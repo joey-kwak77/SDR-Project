@@ -94,7 +94,7 @@ if recorded_audio:
     print(f"\nRecorded {len(audio_clip)/fs:.2f} seconds of audio")
     print(f"Total bits captured: {len(bit_array)*bits}")
     print("First 10 audio samples as bits:")
-    print(bit_array[:10])
+    print(bit_array[:20])
 else:
     print("\nNo audio was recorded. Make sure you press and hold the spacebar while the plot window is open.")
 
@@ -143,9 +143,9 @@ convert bits to symbols (map to constellation of PAM level 256)
 convert symbols to message
 '''
 sps = 5
-N = 16
+N = 4       # don't change or I'll have to redo PAM again :(
 P = Pam()
-symb = P.digital_modulation(bit_array, 256)
+symb = P.digital_modulation(bit_array, N)
 transmit_signal = P.create_message(symb, sps)
 
 
@@ -185,6 +185,10 @@ s = P.detect_pam_symbol(N, s)
 b = P.symbol_to_bits(N, s)
 
 print(b == bit_array)
+if not (b == bit_array):
+    for i in range(len(b)):
+        if (b[i] != bit_array[i]):
+            print (str(i) + ": ", str(b[i]), str(bit_array[i]))
 
 
 
