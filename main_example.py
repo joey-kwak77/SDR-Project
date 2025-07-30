@@ -6,7 +6,6 @@ from PIL import Image
 
 from comms_lib.pluto import Pluto
 from comms_lib.system import DigitalCommSystem
-#  conda env update -f /Users/mia/Documents/GitHub/SDR-Project/cluster8_pyenv_v2.yml
 
 # %%
 # ---------------------------------------------------------------
@@ -20,7 +19,7 @@ T = ts * sps  # time between data symbols (seconds per symbol)
 # ---------------------------------------------------------------
 # Initialize transmitter and receiver.
 # ---------------------------------------------------------------
-tx = Pluto("usb:2.6.5")  # change to your Pluto device
+tx = Pluto("usb:2.10.5")  # change to your Pluto device
 tx.tx_gain = 90  # set the transmitter gain
 
 rx = tx
@@ -38,7 +37,7 @@ system.set_receiver(rx)
 
 # TODO: generate your own transmit signal
 transmit_signal = np.random.uniform(-1, 1, 1000) + 1j * np.random.uniform(-1, 1, 1000)
-
+print(type(transmit_signal))
 
 # transmit from Pluto!
 system.transmit_signal(
