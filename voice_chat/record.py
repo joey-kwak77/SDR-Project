@@ -173,6 +173,7 @@ rx_signal = sdr.rx()  # Capture raw samples from Pluto
 
 # receive_signal = system.receive_signal()
 
+# simulating noise
 receive_signal = (
     transmit_signal
     + np.random.normal(0, 0.1, transmit_signal.shape)
@@ -184,6 +185,7 @@ s = P.decode_message(receive_signal, sps, N)
 s = P.detect_pam_symbol(N, s)
 b = P.symbol_to_bits(N, s)
 
+# debugging
 print(b == bit_array)
 if not (b == bit_array):
     for i in range(len(b)):
