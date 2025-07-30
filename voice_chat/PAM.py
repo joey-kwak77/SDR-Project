@@ -43,7 +43,11 @@ class Pam:
         cons = self.pam_constallation(N)
         res = []
         for num in bits:
-            res.append(float(cons[int(num, 2)]))
+            n1 = num[:len(num)//2]
+            n2 = num[len(num)//2:]
+            res.append(float(cons[int(n1, 2)]))
+            res.append(float(cons[int(n2, 2)]))
+
         return res
 
 

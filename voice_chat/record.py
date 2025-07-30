@@ -102,11 +102,11 @@ else:
 # %%
 # ------------------------------------------------------------------------------------------------------------------------------------------------
 
-from PAM import Pam as P
+from PAM import Pam
 from comms_lib.pluto import Pluto
 from comms_lib.system import DigitalCommSystem
 
-
+'''
 # ---------------------------------------------------------------
 # Digital communication system parameters.
 # ---------------------------------------------------------------
@@ -125,10 +125,10 @@ tx.tx_gain = 90  # set the transmitter gain         (power)
 rx = tx
 # Uncomment the line below to use different Pluto devices for tx and rx
 rx.rx_gain = 90  # set the receiver gain
-
+'''
 system = DigitalCommSystem()
-system.set_transmitter(tx)
-system.set_receiver(rx)
+# system.set_transmitter(tx)
+# system.set_receiver(rx)
 
 
 # %%
@@ -142,9 +142,11 @@ Process:
 convert bits to symbols (map to constellation of PAM level 256)
 convert symbols to message
 '''
-
+sps = 5
+N = 16
+P = Pam()
 symb = P.digital_modulation(bit_array, 256)
-m = P.create_message(symb, sps)
+transmit_signal = P.create_message(symb, sps)
 
 
 '''
@@ -157,11 +159,32 @@ correct transmitted symbols
 convert symbols back to bits
 '''
 
+# sdr stuff ew
+
+
+'''
 # Pluto stuff
 sdr.tx(m)
 
 rx_signal = sdr.rx()  # Capture raw samples from Pluto
 
+'''
+# system.transmit_signal(transmit_signal)
+
+# receive_signal = system.receive_signal()
+
+receive_signal = (
+    transmit_signal
+    + np.random.normal(0, 0.1, transmit_signal.shape)
+    + 1j * np.random.normal(0, 0.1, transmit_signal.shape)
+)
+
+
+s = P.decode_message(receive_signal, sps, N)
+s = P.detect_pam_symbol(N, s)
+b = P.symbol_to_bits(N, s)
+
+print(b == bit_array)
 
 
 
