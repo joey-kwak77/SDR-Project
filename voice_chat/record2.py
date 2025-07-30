@@ -5,10 +5,9 @@ import matplotlib.animation as animation
 from pynput import keyboard as kb
 import threading
 
-
 # Settings
 fs = 44100
-chunk = 1024
+chunk = 1024                          
 bits = 8
 levels = 2**bits
 
@@ -19,40 +18,14 @@ recording_done = threading.Event()
 live_buffer = np.zeros(chunk)
 recorded_audio = []
 
-# Quantization function
+# Quantization
 def quantize(signal, levels):
     return np.round(signal * (levels // 2 - 1)) / (levels // 2 - 1)
 
-# Audio-to-bits
 def audio_to_bits(buffer, levels):
     quantized = quantize(buffer, levels)
     int_levels = ((quantized + 1) / 2 * (levels - 1)).astype(int)
     return [format(val, '08b') for val in int_levels]
-
-# Keyboard events
-def on_press(key):
-    if key == kb.Key.space and not talk.is_set():
-        print("Recording started...")
-        talk.set()
-
-def on_release(key):
-    if key == kb.Key.space and talk.is_set():
-        print("Recording stopped.")
-        talk.clear()
-        recording_done.set()
-        plt.close(fig)
-        return False  # stop listener
-
-# Audio callback
-def audio_callback(indata, frames, time, status):
-    global live_buffer, recorded_audio
-    if status:
-        print("Audio Status:", status)
-
-    live_buffer[:] = indata[:, 0]
-
-    if talk.is_set():
-        recorded_audio.append(indata.copy())
 
 # Plot setup
 fig, ax = plt.subplots()
@@ -66,7 +39,6 @@ ax.set_xlabel("Samples")
 ax.set_ylabel("Amplitude")
 ax.legend()
 
-# Animation update
 def update_plot(frame):
     raw_line.set_ydata(live_buffer)
     quant_line.set_ydata(quantize(live_buffer, levels))
@@ -74,17 +46,47 @@ def update_plot(frame):
 
 ani = animation.FuncAnimation(fig, update_plot, interval=10, blit=True)
 
-# Start keyboard listener
+# Keyboard handlers
+def on_press(key):
+    if key == kb.Key.space and not talk.is_set():
+        print("Recording started...")
+        talk.set()
+
+def on_release(key):
+    if key == kb.Key.space and talk.is_set():
+        print("Recording stopped.")
+        talk.clear()
+        recording_done.set()
+        return False  # stop keyboard listener
+
+# Audio callback
+def audio_callback(indata, frames, time, status):
+    global live_buffer, recorded_audio
+    if status:
+        print("Audio Status:", status)
+    live_buffer[:] = indata[:, 0]
+    if talk.is_set():
+        recorded_audio.append(indata.copy())
+
+# Start listener
 print("Press and hold SPACE to record. Release to stop.")
 listener = kb.Listener(on_press=on_press, on_release=on_release)
 listener.start()
 
-# Start stream and plot
-with sd.InputStream(callback=audio_callback, channels=1, samplerate=fs, blocksize=chunk):
-    plt.show()  # blocks until window closed
+# Start audio stream
+stream = sd.InputStream(callback=audio_callback, channels=1, samplerate=fs, blocksize=chunk)
+stream.start()
 
-# Wait for recording to finish (keyboard release)
-recording_done.wait()
+# Run non-blocking plot loop
+while not recording_done.is_set():
+    plt.pause(0.01)  # allow GUI updates
+
+# Cleanup
+plt.close(fig)
+stream.stop()
+stream.close()
+listener.join()
+
 
 # Combine and convert audio
 if recorded_audio:

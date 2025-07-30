@@ -10,7 +10,7 @@ class Pam:
         Generate a PAM constellation diagram for N levels. The average power of the constellation must be 1.
 
         Parameters:
-        N (int): Number of PAM levels.          should be 4!!
+        N (int): Number of PAM levels.
 
         Returns:
         list: A list of PAM levels.
