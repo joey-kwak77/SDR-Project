@@ -169,28 +169,54 @@ sdr.tx(m)
 rx_signal = sdr.rx()  # Capture raw samples from Pluto
 
 '''
-# system.transmit_signal(transmit_signal)
+print("Transmit signal length:", len(transmit_signal))
+print(type(transmit_signal))
+print(transmit_signal)
+system.transmit_signal(transmit_signal)
 
-# receive_signal = system.receive_signal()
+receive_signal = system.receive_signal()
+print("Receive signal length:", len(receive_signal))
 
-# simulating noise
-receive_signal = (
-    transmit_signal
-    + np.random.normal(0, 0.1, transmit_signal.shape)
-    + 1j * np.random.normal(0, 0.1, transmit_signal.shape)
-)
+plt.figure(figsize=(12, 10))
+plt.subplot(2, 1, 1)
+plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
+plt.plot(np.real(receive_signal), color="red", label="Real Receive")
+plt.title("Transmit and Receive Signals (Real)")
+plt.xlabel("Time Samples")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
+plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
+plt.title("Transmit and Receive Signals (Imaginary)")
+plt.xlabel("Time Samples")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
+
+plt.show()
+
+
+# # simulating noise
+# receive_signal = (
+#     transmit_signal
+#     + np.random.normal(0, 0.1, transmit_signal.shape)
+#     + 1j * np.random.normal(0, 0.1, transmit_signal.shape)
+# )
 
 
 # s = P.decode_message(receive_signal, sps, N)
 # s = P.detect_pam_symbol(N, s)
 # b = P.symbol_to_bits(N, s)
 
-# debugging
-print(b == bit_array)
-if not (b == bit_array):
-    for i in range(len(b)):
-        if (b[i] != bit_array[i]):
-            print (str(i) + ": ", str(b[i]), str(bit_array[i]))
+# # debugging
+# print(b == bit_array)
+# if not (b == bit_array):
+#     for i in range(len(b)):
+#         if (b[i] != bit_array[i]):
+#             print (str(i) + ": ", str(b[i]), str(bit_array[i]))
 
 
 
