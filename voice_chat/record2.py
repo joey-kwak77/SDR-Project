@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from pynput import keyboard as kb
 import threading
-
+                                                               
 # Settings
 fs = 44100
 chunk = 1024                          
@@ -240,7 +240,26 @@ cutoff_freq = 4000  # for speech, 3–4 kHz is usually sufficient
 filtered = low_pass_filter(reconstructed_audio, cutoff_freq=4000, fs=100)
 
 
+'''
+pitch shift
+'''
+import librosa
+
+
+# ask the user for the pitch shift step
+while True:
+  user_input = input("how many steps do you want the pitch to be shifted (ex. 13, -9 etc.): ")
+  try:
+    n_steps = int(user_input)
+    break
+  except ValueError:
+    print("Invalid input. Please enter an integer number.")
+
+
+shifted = librosa.effects.pitch_shift(filtered, sr=44100, n_steps=n_steps)
+
+         
 # Playback the audio
 print("Playing recieved audio...")
-sd.play(filtered, samplerate=44100)
+sd.play(shifted, samplerate=44100)
 sd.wait()
