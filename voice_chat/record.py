@@ -5,7 +5,6 @@ import matplotlib.animation as animation
 from pynput import keyboard as kb
 import threading
 
-from PAM import Pam as P
 
 # Settings
 fs = 44100
@@ -100,7 +99,39 @@ else:
     print("\nNo audio was recorded. Make sure you press and hold the spacebar while the plot window is open.")
 
 
-# ---------------------------------------------
+# %%
+# ------------------------------------------------------------------------------------------------------------------------------------------------
+
+from PAM import Pam as P
+from comms_lib.pluto import Pluto
+from comms_lib.system import DigitalCommSystem
+
+
+# ---------------------------------------------------------------
+# Digital communication system parameters.
+# ---------------------------------------------------------------
+fs = 10e6  # baseband sampling rate (samples per second)
+ts = 1 / fs  # baseband sampling period (seconds per sample)
+sps = 5 # samples per second
+T = ts * sps  # time between data symbols (seconds per symbol)
+
+# ---------------------------------------------------------------
+# Initialize transmitter and receiver.
+# ---------------------------------------------------------------
+sdr = Pluto("usb:1.1.5")  # change to your Pluto device
+tx = sdr
+tx.tx_gain = 90  # set the transmitter gain         (power)
+
+rx = tx
+# Uncomment the line below to use different Pluto devices for tx and rx
+rx.rx_gain = 90  # set the receiver gain
+
+system = DigitalCommSystem()
+system.set_transmitter(tx)
+system.set_receiver(rx)
+
+
+# %%
 
 '''
 convert the bits into a signal to send
@@ -113,7 +144,7 @@ convert symbols to message
 '''
 
 symb = P.digital_modulation(bit_array, 256)
-m = P.create_message(symb, 5)
+m = P.create_message(symb, sps)
 
 
 '''
@@ -127,6 +158,9 @@ convert symbols back to bits
 '''
 
 # Pluto stuff
+sdr.tx(m)
+
+rx_signal = sdr.rx()  # Capture raw samples from Pluto
 
 
 

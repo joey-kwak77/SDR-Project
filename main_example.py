@@ -6,6 +6,7 @@ from PIL import Image
 
 from comms_lib.pluto import Pluto
 from comms_lib.system import DigitalCommSystem
+#  conda env update -f /Users/mia/Documents/GitHub/SDR-Project/cluster8_pyenv_v2.yml
 
 # %%
 # ---------------------------------------------------------------
