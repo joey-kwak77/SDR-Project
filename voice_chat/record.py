@@ -5,6 +5,8 @@ import matplotlib.animation as animation
 from pynput import keyboard as kb
 import threading
 
+from PAM import Pam as P
+
 # Settings
 fs = 44100
 chunk = 1024
@@ -96,3 +98,41 @@ if recorded_audio:
     print(bit_array[:10])
 else:
     print("\nNo audio was recorded. Make sure you press and hold the spacebar while the plot window is open.")
+
+
+# ---------------------------------------------
+
+'''
+convert the bits into a signal to send
+
+8 bits per signal ---> N = 256
+
+Process:
+convert bits to symbols (map to constellation of PAM level 256)
+convert symbols to message
+'''
+
+symb = P.digital_modulation(bit_array, 256)
+m = P.create_message(symb, 5)
+
+
+'''
+send the message over Pluto and decode
+
+Process:
+transmit and recieve message
+decode message to symbols
+correct transmitted symbols
+convert symbols back to bits
+'''
+
+# Pluto stuff
+
+
+
+
+'''
+shift bits to create voice changer effect
+convert bits back to audio
+'''
+

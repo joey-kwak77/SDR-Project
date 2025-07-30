@@ -28,21 +28,29 @@ class Pam:
         return pam_symbols
 
 
-    def create_symbol(self, r: int, c: int):
+    def digital_modulation(self, bits: list, N: int):
         '''
+        maps bits to symbols
+
         Parameters:
-        loc: r, c; both ints between 0 and 9 inclusive
-        10 x 10 board --> M = 16, L = 4
+        bits (list): a list of bits representing the audio recording
+        N (int): Number of PAM levels.
 
-        Returns: array of len 2 containing the symbols corresponding to each grid
+        Returns:
+        res (list): a list of symbols each 8 bits map to
         '''
 
-        cons = self.pam_constallation(16)
-        return np.array([cons[r], cons[c]])
+        cons = self.pam_constallation(N)
+        res = []
+        for num in bits:
+            res.append(float(cons[int(num, 2)]))
+        return res
 
 
     def create_message(self, symbols, K):
         '''
+        Parameters:
+        symbols: a list of symbols
         K: number of repeats
         '''
         #make the square wave
@@ -98,17 +106,19 @@ class Pam:
         symbols: recieved symbols
 
         Returns:
-        res (string): corresponding bits to each symbol
+        res (list): corresponding bits to each symbol
         '''
         L = int(np.log2(N))
         zeros = "0" * L
         M = 2**L
         cons = self.pam_constallation(N)
-        res = ""
+        res = []
         for s in symbols:
+            num = ""
             j = np.where(cons == s)[0][0]
             b = bin(j)[2:]
             l = L - len(b)
-            res += zeros[:l]
-            res += b
+            num += zeros[:l]
+            num += b
+            res.append(num)
         return res
