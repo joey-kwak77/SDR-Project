@@ -20,13 +20,13 @@ T = ts * sps  # time between data symbols (seconds per symbol)
 # ---------------------------------------------------------------
 # Initialize transmitter and receiver.
 # ---------------------------------------------------------------
-tx = Pluto("ip:192.168.2.1")  # change to your Pluto device
+tx = Pluto("usb:2.6.5")  # change to your Pluto device
 tx.tx_gain = 90  # set the transmitter gain
 
 rx = tx
 # Uncomment the line below to use different Pluto devices for tx and rx
-rx = Pluto("usb:7.6.5")
-rx.rx_gain = 90  # set the receiver gain
+# rx = Pluto("usb:7.6.5")
+# rx.rx_gain = 90  # set the receiver gain
 
 # %%
 # ---------------------------------------------------------------
