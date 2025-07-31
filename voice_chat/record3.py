@@ -299,5 +299,3 @@ print("Playing recieved audio...")
 sd.play(shifted, samplerate=44100)
 sd.wait()
 
-
-
