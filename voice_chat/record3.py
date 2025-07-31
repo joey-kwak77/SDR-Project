@@ -121,14 +121,14 @@ T = ts * sps  # time between data symbols (seconds per symbol)
 # ---------------------------------------------------------------
 # Initialize transmitter and receiver.
 # ---------------------------------------------------------------
-sdr = Pluto("usb:2.9.5")  # change to your Pluto device
+sdr = Pluto("usb:2.7.5")  # change to your Pluto device
 tx = sdr
 tx.tx_gain = 60  # set the transmitter gain         (power)
 
 rx = tx
 # Uncomment the line below to use different Pluto devices for tx and rx
 rx.rx_gain = 60  # set the receiver gain
-
+sdr.carrier_frequency=840e6                       
 system = DigitalCommSystem()
 system.set_transmitter(tx)
 system.set_receiver(rx)
@@ -177,26 +177,26 @@ receive_signal = np.concatenate(all_received)
 print(f"Total received signal length: {len(receive_signal)}")
 
 
-# plt.figure(figsize=(12, 10))
-# plt.subplot(2, 1, 1)
-# plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
-# plt.plot(np.real(receive_signal), color="red", label="Real Receive")
-# plt.title("Transmit and Receive Signals (Real)")
-# plt.xlabel("Time Samples")
-# plt.ylabel("Amplitude")
-# plt.grid(True)
-# plt.legend()
+plt.figure(figsize=(12, 10))
+plt.subplot(2, 1, 1)
+plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
+plt.plot(np.real(receive_signal), color="red", label="Real Receive")
+plt.title("Transmit and Receive Signals (Real)")
+plt.xlabel("Time Samples")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
 
-# plt.subplot(2, 1, 2)
-# plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
-# plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
-# plt.title("Transmit and Receive Signals (Imaginary)")                        
-# plt.xlabel("Time Samples")
-# plt.ylabel("Amplitude")
-# plt.grid(True)
-# plt.legend()
+plt.subplot(2, 1, 2)
+plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
+plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
+plt.title("Transmit and Receive Signals (Imaginary)")                        
+plt.xlabel("Time Samples")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
 
-# plt.show()
+plt.show()
 
 
 
@@ -225,41 +225,7 @@ def bits_to_audio(bit_array, levels):
 
 
 
-# def sinc_lpf(B, fs, num_taps):
-#     """Return a low-pass filter using a sinc function.
-    
-#     Args:
-#         B (float): Bandwidth of the filter.
-#         fs (float): Sampling frequency.
-#         num_taps (int): Number of taps in the filter."""
 
-#     if num_taps % 2 == 0:
-#         raise ValueError("num_taps must be odd")
-
-#     t = np.arange(-num_taps // 2, num_taps // 2 + 1)
-#     sinc_arg = 2 * cutoff_freq * t / fs
-#     h = 2 * cutoff_freq / fs * np.sinc(sinc_arg)
-
-#     # Normalize the filter coefficients
-#     h /= np.sum(h)
-
-#     return h
-
-
-# def low_pass_filter(data, cutoff_freq, fs, num_taps=101):
-#     """Implement a low pass filter using a sinc function, where the samping rate is f0
-
-#     Args:
-#         data (np.ndarray): Input signal to be filtered.
-#         cutoff_freq (float): Cutoff frequency of the low pass filter.
-
-#     Returns:
-#         np.ndarray: Filtered signal.
-#     """
-
-#     #implement the low pass filter using a sinc function
-#     h = sinc_lpf(cutoff_freq, fs, num_taps)
-#     return np.convolve(data, h, mode='same')
 
     
 
@@ -267,8 +233,6 @@ def bits_to_audio(bit_array, levels):
 levels = 256  # bits = 8
 reconstructed_audio = bits_to_audio(b, levels) 
 
-# cutoff_freq = 4000  # for speech, 3–4 kHz is usually sufficient
-# filtered = low_pass_filter(reconstructed_audio, cutoff_freq=4000, fs=100)
 
 
 '''
