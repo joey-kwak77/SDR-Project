@@ -145,7 +145,7 @@ convert bits to symbols (map to constellation of PAM level 256)
 convert symbols to message
 '''
 sps = 3
-N = 4       # don't change or I'll have to redo PAM again :(
+N = 4 
 P = Pam()
 symb = P.digital_modulation(bit_array, N)
 transmit_signal = P.create_message(symb, sps)
@@ -179,8 +179,6 @@ plt.grid(True)
 plt.legend()
 
 plt.show()
-
-# sdr stuff ew
 
 # receive_signal = transmit_signal # change later
 
