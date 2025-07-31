@@ -155,7 +155,7 @@ transmit_signal = P.create_message(symb, sps)
 print("Transmit signal length:", len(transmit_signal))
 print(type(transmit_signal))
 print(transmit_signal)
-chunk_size = 50000
+chunk_size = 80000
 num_chunks = int(np.ceil(len(transmit_signal) / chunk_size))
 all_received = []
 
@@ -177,26 +177,26 @@ receive_signal = np.concatenate(all_received)
 print(f"Total received signal length: {len(receive_signal)}")
 
 
-plt.figure(figsize=(12, 10))
-plt.subplot(2, 1, 1)
-plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
-plt.plot(np.real(receive_signal), color="red", label="Real Receive")
-plt.title("Transmit and Receive Signals (Real)")
-plt.xlabel("Time Samples")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.legend()
+# plt.figure(figsize=(12, 10))
+# plt.subplot(2, 1, 1)
+# plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
+# plt.plot(np.real(receive_signal), color="red", label="Real Receive")
+# plt.title("Transmit and Receive Signals (Real)")
+# plt.xlabel("Time Samples")
+# plt.ylabel("Amplitude")
+# plt.grid(True)
+# plt.legend()
 
-plt.subplot(2, 1, 2)
-plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
-plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
-plt.title("Transmit and Receive Signals (Imaginary)")
-plt.xlabel("Time Samples")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.legend()
+# plt.subplot(2, 1, 2)
+# plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
+# plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
+# plt.title("Transmit and Receive Signals (Imaginary)")                        
+# plt.xlabel("Time Samples")
+# plt.ylabel("Amplitude")
+# plt.grid(True)
+# plt.legend()
 
-plt.show()
+# plt.show()
 
 
 
@@ -225,41 +225,41 @@ def bits_to_audio(bit_array, levels):
 
 
 
-def sinc_lpf(B, fs, num_taps):
-    """Return a low-pass filter using a sinc function.
+# def sinc_lpf(B, fs, num_taps):
+#     """Return a low-pass filter using a sinc function.
     
-    Args:
-        B (float): Bandwidth of the filter.
-        fs (float): Sampling frequency.
-        num_taps (int): Number of taps in the filter."""
+#     Args:
+#         B (float): Bandwidth of the filter.
+#         fs (float): Sampling frequency.
+#         num_taps (int): Number of taps in the filter."""
 
-    if num_taps % 2 == 0:
-        raise ValueError("num_taps must be odd")
+#     if num_taps % 2 == 0:
+#         raise ValueError("num_taps must be odd")
 
-    t = np.arange(-num_taps // 2, num_taps // 2 + 1)
-    sinc_arg = 2 * cutoff_freq * t / fs
-    h = 2 * cutoff_freq / fs * np.sinc(sinc_arg)
+#     t = np.arange(-num_taps // 2, num_taps // 2 + 1)
+#     sinc_arg = 2 * cutoff_freq * t / fs
+#     h = 2 * cutoff_freq / fs * np.sinc(sinc_arg)
 
-    # Normalize the filter coefficients
-    h /= np.sum(h)
+#     # Normalize the filter coefficients
+#     h /= np.sum(h)
 
-    return h
+#     return h
 
 
-def low_pass_filter(data, cutoff_freq, fs, num_taps=101):
-    """Implement a low pass filter using a sinc function, where the samping rate is f0
+# def low_pass_filter(data, cutoff_freq, fs, num_taps=101):
+#     """Implement a low pass filter using a sinc function, where the samping rate is f0
 
-    Args:
-        data (np.ndarray): Input signal to be filtered.
-        cutoff_freq (float): Cutoff frequency of the low pass filter.
+#     Args:
+#         data (np.ndarray): Input signal to be filtered.
+#         cutoff_freq (float): Cutoff frequency of the low pass filter.
 
-    Returns:
-        np.ndarray: Filtered signal.
-    """
+#     Returns:
+#         np.ndarray: Filtered signal.
+#     """
 
-    #implement the low pass filter using a sinc function
-    h = sinc_lpf(cutoff_freq, fs, num_taps)
-    return np.convolve(data, h, mode='same')
+#     #implement the low pass filter using a sinc function
+#     h = sinc_lpf(cutoff_freq, fs, num_taps)
+#     return np.convolve(data, h, mode='same')
 
     
 
@@ -267,8 +267,8 @@ def low_pass_filter(data, cutoff_freq, fs, num_taps=101):
 levels = 256  # bits = 8
 reconstructed_audio = bits_to_audio(b, levels) 
 
-cutoff_freq = 4000  # for speech, 3–4 kHz is usually sufficient
-filtered = low_pass_filter(reconstructed_audio, cutoff_freq=4000, fs=100)
+# cutoff_freq = 4000  # for speech, 3–4 kHz is usually sufficient
+# filtered = low_pass_filter(reconstructed_audio, cutoff_freq=4000, fs=100)
 
 
 '''
@@ -287,7 +287,7 @@ while True:
     print("Invalid input. Please enter an integer number.")
 
 
-shifted = librosa.effects.pitch_shift(filtered, sr=44100, n_steps=n_steps)
+shifted = librosa.effects.pitch_shift(reconstructed_audio, sr=44100, n_steps=n_steps)
 
          
 # Playback the audio
