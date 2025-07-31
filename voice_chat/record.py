@@ -181,9 +181,9 @@ receive_signal = (
 )
 
 
-# s = P.decode_message(receive_signal, sps, N)
-# s = P.detect_pam_symbol(N, s)
-# b = P.symbol_to_bits(N, s)
+s = P.decode_message(receive_signal, sps, N)
+s = P.detect_pam_symbol(N, s)
+b = P.symbol_to_bits(N, s)
 
 # debugging
 print(b == bit_array)

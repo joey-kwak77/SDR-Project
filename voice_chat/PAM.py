@@ -51,7 +51,11 @@ class Pam:
             res.append(float(cons[int(n1, 2)]))
             res.append(float(cons[int(n2, 2)]))
             res.append(float(cons[int(n3, 2)]))
-            res.append(float(cons[int(n4, 2)]))
+            try:
+                res.append(float(cons[int(n4, 2)]))
+            except IndexError:                          #idk why this is happening
+                print("Index Error!")
+                print(n4, int(n4, 2))
 
         return res
 
