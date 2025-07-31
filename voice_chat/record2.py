@@ -109,7 +109,6 @@ from PAM import Pam
 from comms_lib.pluto import Pluto
 from comms_lib.system import DigitalCommSystem
 
-'''
 # ---------------------------------------------------------------
 # Digital communication system parameters.
 # ---------------------------------------------------------------
@@ -121,17 +120,17 @@ T = ts * sps  # time between data symbols (seconds per symbol)
 # ---------------------------------------------------------------
 # Initialize transmitter and receiver.
 # ---------------------------------------------------------------
-sdr = Pluto("usb:1.1.5")  # change to your Pluto device
+sdr = Pluto("usb:2.9.5")  # change to your Pluto device
 tx = sdr
-tx.tx_gain = 90  # set the transmitter gain         (power)
+tx.tx_gain = 60  # set the transmitter gain         (power)
 
 rx = tx
 # Uncomment the line below to use different Pluto devices for tx and rx
-rx.rx_gain = 90  # set the receiver gain
-'''
+rx.rx_gain = 60  # set the receiver gain
+
 system = DigitalCommSystem()
-# system.set_transmitter(tx)
-# system.set_receiver(rx)
+system.set_transmitter(tx)
+system.set_receiver(rx)
 
 
 # %%
@@ -145,28 +144,45 @@ Process:
 convert bits to symbols (map to constellation of PAM level 256)
 convert symbols to message
 '''
-sps = 5
+sps = 3
 N = 4       # don't change or I'll have to redo PAM again :(
 P = Pam()
 symb = P.digital_modulation(bit_array, N)
-print(f"Number of symbols transmitted: {len(symb)}")
-
 transmit_signal = P.create_message(symb, sps)
 
 
-'''
-send the message over Pluto and decode
+print("Transmit signal length:", len(transmit_signal))
+print(type(transmit_signal))
+print(transmit_signal)
+system.transmit_signal(transmit_signal)
 
-Process:
-transmit and recieve message
-decode message to symbols
-correct transmitted symbols
-convert symbols back to bits
-'''
+receive_signal = system.receive_signal()
+print("Receive signal length:", len(receive_signal))
+
+plt.figure(figsize=(12, 10))
+plt.subplot(2, 1, 1)
+plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
+plt.plot(np.real(receive_signal), color="red", label="Real Receive")
+plt.title("Transmit and Receive Signals (Real)")
+plt.xlabel("Time Samples")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
+plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
+plt.title("Transmit and Receive Signals (Imaginary)")
+plt.xlabel("Time Samples")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
+
+plt.show()
 
 # sdr stuff ew
 
-receive_signal = transmit_signal # change later
+# receive_signal = transmit_signal # change later
 
 
 s = P.decode_message(receive_signal, sps, N)

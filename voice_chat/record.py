@@ -118,13 +118,13 @@ T = ts * sps  # time between data symbols (seconds per symbol)
 # ---------------------------------------------------------------
 # Initialize transmitter and receiver.
 # ---------------------------------------------------------------
-sdr = Pluto("usb:2.10.5")  # change to your Pluto device
+sdr = Pluto("usb:2.9 .5")  # change to your Pluto device
 tx = sdr
-tx.tx_gain = 60  # set the transmitter gain         (power)
+tx.tx_gain = 90  # set the transmitter gain         (power)
 
 rx = tx
 # Uncomment the line below to use different Pluto devices for tx and rx
-rx.rx_gain = 60  # set the receiver gain
+# rx.rx_gain = 60  # set the receiver gain
 
 system = DigitalCommSystem()
 system.set_transmitter(tx)
@@ -169,13 +169,67 @@ sdr.tx(m)
 rx_signal = sdr.rx()  # Capture raw samples from Pluto
 
 '''
-print("Transmit signal length:", len(transmit_signal))
-print(type(transmit_signal))
-print(transmit_signal)
-system.transmit_signal(transmit_signal)
+chunk_size =30000
 
-receive_signal = system.receive_signal()
-print("Receive signal length:", len(receive_signal))
+num_chunks = int(np.ceil(len(transmit_signal) / chunk_size))
+print(f"Transmitting in {num_chunks} chunks of size {chunk_size}...")
+
+received_chunks = []
+
+for i in range(num_chunks):
+    
+    start = i * chunk_size
+    end = min((i + 1) * chunk_size, len(transmit_signal))
+    chunk = transmit_signal[start:end]
+    system.transmit_signal(chunk)
+
+    expected = len(chunk)*sps
+    received = np.array([], dtype=np.complex64)
+    attempts = 0
+    while len(received) <expected and attempts < 50:
+        received = np.concatenate((received, system.receive_signal()))
+        attempts +=1
+
+    rx_chunk = received[sps //2:: sps][:len(chunk)]
+    received_chunks.append(rx_chunk)
+    print(f"Transmitting chunk {i+1}/{num_chunks}, length: {len(chunk)}")
+
+        
+        # system.transmit_signal(chunk)
+        # time.sleep(0.1)  
+
+        # receive_signal = system.receive_signal()
+        # received_chunks.append(receive_signal)
+
+# def transmit_and_receive_chunks(system, signal, chunk_size=30000):
+#     num_chunks = int(np.ceil(len(signal) / chunk_size))
+#     received_chunks = []
+
+#     print(f"Transmitting and receiving in {num_chunks} chunks of size {chunk_size}...")
+
+#     for i in range(num_chunks):
+#         start = i * chunk_size
+#         end = min((i + 1) * chunk_size, len(signal))
+#         tx_chunk = signal[start:end]
+
+#         print(f"Transmitting chunk {i+1}/{num_chunks}, length: {len(tx_chunk)}")
+#         system.transmit_signal(tx_chunk)
+
+#         time.sleep(0.05)
+
+#         rx_chunk = system.receive_signal()
+#         received_chunks.append(rx_chunk)
+
+#     return np.concatenate(received_chunks)
+
+# print("Transmit signal length:", len(transmit_signal))
+# receive_signal = transmit_and_receive_chunks(system, transmit_signal)
+# print("Receive signal length:", len(receive_signal))
+
+print("Transmit signal length:", len(transmit_signal))
+
+
+receive_signal = np.concatenate(received_chunks)
 
 plt.figure(figsize=(12, 10))
 plt.subplot(2, 1, 1)
@@ -197,7 +251,6 @@ plt.grid(True)
 plt.legend()
 
 plt.show()
-
 
 # # simulating noise
 # receive_signal = (
