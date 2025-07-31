@@ -167,7 +167,7 @@ for i in range(num_chunks):
 
     print(f"Transmitting chunk {i + 1}/{num_chunks} (length = {len(chunk)})")
     system.transmit_signal(chunk)
-    time.sleep(0.5)  # Pause to allow complete transmit
+    time.sleep(0.5)  
 
     received = system.receive_signal()
     print(f"Received chunk {i + 1} length: {len(received)}")
@@ -175,9 +175,6 @@ for i in range(num_chunks):
 
 receive_signal = np.concatenate(all_received)
 print(f"Total received signal length: {len(receive_signal)}")
-# system.transmit_signal(transmit_signal)
-
-# receive_signal = system.receive_signal()
 
 
 plt.figure(figsize=(12, 10))
@@ -201,7 +198,6 @@ plt.legend()
 
 plt.show()
 
-# receive_signal = transmit_signal # change later
 
 
 s = P.decode_message(receive_signal, sps, N)
