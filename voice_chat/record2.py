@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from pynput import keyboard as kb
 import threading
+import time
                                                                
 # Settings
 fs = 44100
@@ -154,10 +155,30 @@ transmit_signal = P.create_message(symb, sps)
 print("Transmit signal length:", len(transmit_signal))
 print(type(transmit_signal))
 print(transmit_signal)
-system.transmit_signal(transmit_signal)
+chunk_size = 50000
+num_chunks = int(np.ceil(len(transmit_signal) / chunk_size))
+all_received = []
 
-receive_signal = system.receive_signal()
-print("Receive signal length:", len(receive_signal))
+print(f"\nTransmitting {num_chunks} chunks...")
+for i in range(num_chunks):
+    start = i * chunk_size
+    end = min(start + chunk_size, len(transmit_signal))
+    chunk = transmit_signal[start:end]
+
+    print(f"Transmitting chunk {i + 1}/{num_chunks} (length = {len(chunk)})")
+    system.transmit_signal(chunk)
+    time.sleep(0.5)  # Pause to allow complete transmit
+
+    received = system.receive_signal()
+    print(f"Received chunk {i + 1} length: {len(received)}")
+    all_received.append(received)
+
+receive_signal = np.concatenate(all_received)
+print(f"Total received signal length: {len(receive_signal)}")
+# system.transmit_signal(transmit_signal)
+
+# receive_signal = system.receive_signal()
+
 
 plt.figure(figsize=(12, 10))
 plt.subplot(2, 1, 1)
@@ -279,3 +300,6 @@ shifted = librosa.effects.pitch_shift(filtered, sr=44100, n_steps=n_steps)
 print("Playing recieved audio...")
 sd.play(shifted, samplerate=44100)
 sd.wait()
+
+
+
