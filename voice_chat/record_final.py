@@ -97,8 +97,8 @@ listener.join()
 # Combine and convert audio
 if recorded_audio:
     audio_clip = np.concatenate(recorded_audio, axis=0).flatten()
-    bit_strs = audio_to_bits(audio_clip, levels)
-    bit_array = np.array([int(b) for bits in bit_strs for b in bits], dtype=int)
+    bit_array = audio_to_bits(audio_clip, levels)
+    
     print("Length of bit array: ", len(bit_array))
     # Output
     print(f"\nRecorded {len(audio_clip)/fs:.2f} seconds of audio")
@@ -107,6 +107,46 @@ if recorded_audio:
     print(bit_array[:20])
 else:
     print("\nNo audio was recorded. Make sure you press and hold the spacebar while the plot window is open.")
+
+
+def compression(bits) -> str:
+    '''
+    compress the bits using differential encoding
+    Return:
+        encoded: a string of bits
+            first 8: starting value
+            after: 4 bit values --> [0]: +/-, [1:]: diff in binary 
+    '''
+
+
+    encoded = bits[0]
+    prev = int(bits[0], 2)
+    loss = False
+
+    for b in bits[1:]:              
+        diff = (int(b, 2) - prev)
+
+        if (abs(diff) > 8):
+            loss = True
+            diff = max(-8, min(8, diff))
+
+        if (diff < 0):
+            encoded += ("0" + str(f'{(abs(diff)):03b}'))
+        else:
+            encoded += ("1" + str(f'{(diff):03b}'))
+
+        prev = (prev + diff) & 0xFF
+
+    return encoded
+
+
+
+
+
+compressed = compression(bit_array)
+print("Length of compressed data: " + str(len(compressed)))
+# print("compressed data: " + compressed[:100])
+
 
 
 
@@ -248,11 +288,50 @@ plt.axis('equal')
 plt.legend()
 plt.show()
 
+
+def decompression(encoded):
+    '''
+    decompress numpy array back into original bit_array form
+    '''
+    # bit_str = np.array2string(encoded)
+    nBits = 4
+    bit_str = str(encoded)
+    res = []
+
+    # get first value:
+    res.append(bit_str[:8])
+    prev = int(bit_str[:8], 2)
+
+    bit_str = bit_str[8:]
+
+    for i in range(0, len(bit_str), nBits):
+        sign = bit_str[i]
+        diff = bit_str[i+1:i+nBits]
+
+        if (diff == ""):
+            break
+
+        diff = int(diff, 2)
+
+        if sign == "0": # neg
+            res.append(f'{(prev - diff):08b}')
+            prev -= diff
+        else:
+            res.append(f'{(prev + diff):08b}')
+            prev += diff
+    return res
+
+
+decomp = decompression(b)
+print("Data lost: " + str(not(decomp == bit_array)))
+
 '''
 shift bits to create voice changer effect
 convert bits back to audio
 apply low pass filter to reduce noise in the audio
 '''
+
+
 
 def bits_to_audio(bit_array, levels):
     # Convert each 8-bit string back to int
