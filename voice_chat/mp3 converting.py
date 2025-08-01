@@ -130,6 +130,12 @@ with open("output.mp3", "wb") as f:
 with open("output.mp3", "rb") as f:
     compressed_bits = f.read()
 
+# unpack to a string of "0"/"1"
+compressed_bit_str = "".join(f"{b:08b}" for b in compressed_bits)
+#—or— NumPy for large streams
+compressed_bit_array = np.unpackbits(np.frombuffer(compressed_bits, dtype=np.uint8), bitorder="big")
+
+
 # def compression(bits) -> str:
 #     '''
 #     compress the bits using differential encoding
@@ -228,7 +234,7 @@ P = Pam()
 # print(len(symb))
 
 constellation = get_qam_constellation(M=N)
-symb, padding = qam_mapper(compressed_bits,constellation)
+symb, padding = qam_mapper(compressed_bit_array,constellation)
 
 
 transmit_signal = P.create_message(symb, sps)
