@@ -116,7 +116,7 @@ else:
 Compress bit_array using differential encoding !
 """
                            
-def compression(bits: list) -> str:
+def compression(b: np.array) -> str:
     '''
     compress the bits using differential encoding
     Return:
@@ -124,15 +124,15 @@ def compression(bits: list) -> str:
             first 8: starting value
             after: 4 bit values --> [0]: +/-, [1:]: diff in binary 
     '''
+    bits = [b[i:i + 8] for i in range(0, len(b), 8)]
+
     encoded = bits[0]
     prev = int(bits[0], 2)
-    loss = False
 
     for b in bits[1:]:              
         diff = (int(b, 2) - prev)
 
         if (abs(diff) > 8):
-            loss = True
             diff = max(-8, min(8, diff))
 
         if (diff < 0):
