@@ -250,8 +250,8 @@ plt.axis('equal')
 plt.legend()
 plt.show()
 
+
 '''
-shift bits to create voice changer effect
 convert bits back to audio
 apply low pass filter to reduce noise in the audio
 '''
