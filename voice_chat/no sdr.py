@@ -103,38 +103,10 @@ else:
     print("\nNo audio was recorded. Make sure you press and hold the spacebar while the plot window is open.")
 
 
-# %%
 # ------------------------------------------------------------------------------------------------------------------------------------------------
 
 from PAM import Pam
-from comms_lib.pluto import Pluto
-from comms_lib.system import DigitalCommSystem
 
-# ---------------------------------------------------------------
-# Digital communication system parameters.
-# ---------------------------------------------------------------
-fs = 10e6  # baseband sampling rate (samples per second)
-ts = 1 / fs  # baseband sampling period (seconds per sample)
-sps = 5 # samples per second
-T = ts * sps  # time between data symbols (seconds per symbol)
-
-# ---------------------------------------------------------------
-# Initialize transmitter and receiver.
-# ---------------------------------------------------------------
-sdr = Pluto("usb:2.9.5")  # change to your Pluto device
-tx = sdr
-tx.tx_gain = 60  # set the transmitter gain         (power)
-
-rx = tx
-# Uncomment the line below to use different Pluto devices for tx and rx
-rx.rx_gain = 60  # set the receiver gain
-
-system = DigitalCommSystem()
-system.set_transmitter(tx)
-system.set_receiver(rx)
-
-
-# %%
 
 '''
 convert the bits into a signal to send
@@ -148,7 +120,7 @@ convert symbols to message
 sps = 3
 N = 4 
 P = Pam()
-symb = P.digital_modulation(bit_array, N)
+symb = P.digital_modulation2(bit_array, N)
 transmit_signal = P.create_message(symb, sps)
 
 
@@ -159,54 +131,10 @@ chunk_size = 50000
 num_chunks = int(np.ceil(len(transmit_signal) / chunk_size))
 all_received = []
 
-print(f"\nTransmitting {num_chunks} chunks...")
-for i in range(num_chunks):
-    start = i * chunk_size
-    end = min(start + chunk_size, len(transmit_signal))
-    chunk = transmit_signal[start:end]
 
-    print(f"Transmitting chunk {i + 1}/{num_chunks} (length = {len(chunk)})")
-    system.transmit_signal(chunk)
-    time.sleep(0.5)  # Pause to allow complete transmit
-
-    received = system.receive_signal()
-    print(f"Received chunk {i + 1} length: {len(received)}")
-    all_received.append(received)
-
-receive_signal = np.concatenate(all_received)
-print(f"Total received signal length: {len(receive_signal)}")
-# system.transmit_signal(transmit_signal)
-
-# receive_signal = system.receive_signal()
-
-
-plt.figure(figsize=(12, 10))
-plt.subplot(2, 1, 1)
-plt.plot(np.real(transmit_signal), color="blue", marker="o", label="Real Transmit")
-plt.plot(np.real(receive_signal), color="red", label="Real Receive")
-plt.title("Transmit and Receive Signals (Real)")
-plt.xlabel("Time Samples")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.legend()
-
-plt.subplot(2, 1, 2)
-plt.plot(np.imag(transmit_signal), color="blue", marker="o", label="Imaginary Transmit")
-plt.plot(np.imag(receive_signal), color="red", label="Imaginary Receive")
-plt.title("Transmit and Receive Signals (Imaginary)")
-plt.xlabel("Time Samples")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.legend()
-
-plt.show()
-
-# receive_signal = transmit_signal # change later
-
-
-s = P.decode_message(receive_signal, sps, N)
+s = P.decode_message(transmit_signal, sps, N)
 s = P.detect_pam_symbol(N, s)
-b = P.symbol_to_bits(N, s)
+b = P.symbol_to_bits2(N, s)
 
 print(f"Same signal received? {b == bit_array}")
 
@@ -298,6 +226,3 @@ shifted = librosa.effects.pitch_shift(filtered, sr=44100, n_steps=n_steps)
 print("Playing recieved audio...")
 sd.play(shifted, samplerate=44100)
 sd.wait()
-
-
-

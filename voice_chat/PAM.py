@@ -48,6 +48,34 @@ class Pam:
             res.append(float(cons[int(n, 2)]))
 
         return res
+    
+
+    def digital_modulation2(self, bits: list, N: int):
+        '''
+        maps bits to symbols
+
+        Parameters:
+        bits (list): a list of bits representing the audio recording
+        N (int): Number of PAM levels.          should be 4!!
+
+        Returns:
+        res (list): a list of symbols each 8 bits map to
+        '''
+
+        cons = self.pam_constallation(N)
+        res = []
+        for num in bits:
+            n1 = num[:len(num)//4]
+            n2 = num[len(num)//4:len(num)//2]
+            n3 = num[len(num)//2:(len(num)//4) *3]
+            n4 = num[(len(num)//4)*3:]
+
+            res.append(float(cons[int(n1, 2)]))
+            res.append(float(cons[int(n2, 2)]))
+            res.append(float(cons[int(n3, 2)]))
+            res.append(float(cons[int(n4, 2)]))
+
+        return res
 
 
     def create_message(self, symbols, K):
@@ -123,5 +151,34 @@ class Pam:
             num += zeros[:l]
             num += b
             res += num
+            i += 1
+        return res
+
+
+    def symbol_to_bits2(self, N, symbols):
+        '''
+        Parameters:
+        N (int): Number of PAM levels.          should be 4!!
+        symbols: recieved symbols
+
+        Returns:
+        res (list): corresponding bits to each symbol
+        '''
+        L = int(np.log2(N))
+        zeros = "0" * L
+        M = 2**L
+        cons = self.pam_constallation(N)
+        res = []
+        i = 0
+        for s in symbols:
+            if i % 4 == 0:
+                num = ""
+            j = np.where(cons == s)[0][0]
+            b = bin(j)[2:]
+            l = L - len(b)
+            num += zeros[:l]
+            num += b
+            if i % 4 == 3:
+                res.append(num)
             i += 1
         return res
