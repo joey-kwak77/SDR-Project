@@ -13,7 +13,7 @@ from comms_lib.system import DigitalCommSystem
 from comms_lib.dsp import *
 
 # Settings
-fs = 44100
+fs = 44100               
 chunk = 1024                          
 bits = 8
 levels = 2**bits
@@ -185,7 +185,7 @@ for i in range(num_chunks):
 
     print(f"Transmitting chunk {i + 1}/{num_chunks} (length = {len(chunk)})")
     system.transmit_signal(chunk)
-    time.sleep(0.5)  
+    # time.sleep(0.5)  
 
     received = system.receive_signal()
     print(f"Received chunk {i + 1} length: {len(received)}")
@@ -278,7 +278,7 @@ pitch shift
 
 # ask the user for the pitch shift step
 while True:
-  user_input = input("how many steps do you want the pitch to be shifted (ex. 13, -9 etc.): ")
+  user_input = input("how many steps do you want the pitch to be shifted (ex. 2, -1, etc.): ")
   try:
     n_steps = int(user_input)
     break
