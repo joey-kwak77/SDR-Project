@@ -135,7 +135,7 @@ rx = tx
 system = DigitalCommSystem()
 system.set_transmitter(tx)
 system.set_receiver(rx)
-system.set_carrier_frequency(870e6)
+system.set_carrier_frequency(890e6)
 system.transmitter.tx_gain = 90
 system.receiver.rx_gain = 30
 system.receiver.rx_buffer_size = int(1e6)
@@ -167,8 +167,7 @@ P = Pam()
 constellation = get_qam_constellation(M=N)
 symb, padding = qam_mapper(bit_array,constellation)
 
-perm = np.random.permutation(len(symb))
-shuffled_symbol = symb[perm]
+
 transmit_signal = P.create_message(symb, sps)
 
 print("Transmit signal length:", len(transmit_signal))
@@ -192,16 +191,16 @@ for i in range(num_chunks):
     print(f"Received chunk {i + 1} length: {len(received)}")
     all_received.append(received)
 
-    plt.figure(figsize=(12, 10))
-    plt.subplot(2, 1, 1)
-    plt.plot(np.real(chunk), color="blue", marker="o", label="Real Transmit")
-    plt.plot(np.real(received), color="red", label="Real Receive")
-    plt.title("Transmit and Receive Signals (Real)")
-    plt.xlabel("Time Samples")
-    plt.ylabel("Amplitude")
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+    # plt.figure(figsize=(12, 10))
+    # plt.subplot(2, 1, 1)
+    # plt.plot(np.real(chunk), color="blue", marker="o", label="Real Transmit")
+    # plt.plot(np.real(received), color="red", label="Real Receive")
+    # plt.title("Transmit and Receive Signals (Real)")
+    # plt.xlabel("Time Samples")
+    # plt.ylabel("Amplitude")
+    # plt.grid(True)
+    # plt.legend()
+    # plt.show()
 
 receive_signal = np.concatenate(all_received)
 print(f"Total received signal length: {len(receive_signal)}")
@@ -228,8 +227,7 @@ rx_symb = demod_nearest(rx_symbols, constellation)
 #unshuffled_symbols = s[unperm]
 #b = P.symbol_to_bits(N, s)
 
-unperm = np.argsort(perm)
-rx_symb = rx_symb[unperm]
+
 
 rx_bit_array = qam_demapper(rx_symb,padding,constellation)
 
