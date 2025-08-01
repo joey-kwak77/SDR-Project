@@ -124,7 +124,8 @@ def compression(b: np.array) -> str:
             first 8: starting value
             after: 4 bit values --> [0]: +/-, [1:]: diff in binary 
     '''
-    bits = [b[i:i + 8] for i in range(0, len(b), 8)]
+    # bits = [b[i:i + 8] for i in range(0, b.size, 8)]
+    bits = b
 
     encoded = bits[0]
     prev = int(bits[0], 2)
@@ -149,9 +150,9 @@ def decompression(encoded):
     '''
     decompress numpy array back into original bit_array form
     '''
-    # bit_str = np.array2string(encoded)
-    nBits = 4
+    # bit_str = "".join(encoded.astype(str))
     bit_str = str(encoded)
+    nBits = 4
     res = []
 
     # get first value:
@@ -182,7 +183,22 @@ def decompression(encoded):
 compressed = compression(bit_array)
 print("Length of compressed data: " + str(len(compressed)))
 # print("compressed data: " + compressed[:100])
-decomp = decompression(compressed)
+
+
+# Corrept the symbols
+n = np.fromiter(compressed, dtype='U1')
+n = n.astype(int)
+corrupt = (
+    n
+    + np.random.normal(0, 0.1, n.shape)
+    + 1j * np.random.normal(0, 0.1, n.shape)
+)
+c = "".join(corrupt.astype(str))
+
+
+
+decomp = decompression(c)
+print(decomp[:10])
 print("Data lost: " + str(not(decomp == bit_array)))
 
 
@@ -203,105 +219,4 @@ print("Playing recieved audio...")
 sd.play(reconstructed_audio, samplerate=44100)
 sd.wait()
 
-
-
-# # ------------------------------------------------------------------------------------------------------------------------------------------------
-# # PAM + sending signal
-
-# from PAM import Pam
-# from comms_lib.pluto import Pluto
-# from comms_lib.system import DigitalCommSystem
-
-
-# '''
-# convert the bits into a signal to send
-
-# 8 bits per signal ---> N = 256
-
-# Process:
-# convert bits to symbols (map to constellation of PAM level 256)
-# convert symbols to message
-# '''
-# sps = 3
-# N = 16
-# P = Pam()
-# # symb = P.digital_modulation(bit_array, N)
-# # symb = np.asarray(symb)  # Ensure it's a NumPy array
-# # print(len(symb))
-
-# constellation = get_qam_constellation(M=N)
-# symb, padding = qam_mapper(bit_array,constellation)
-
-# perm = np.random.permutation(len(symb))
-# shuffled_symbol = symb[perm]
-# transmit_signal = P.create_message(symb, sps)
-
-# print("Transmit signal length:", len(transmit_signal))
-# print(type(transmit_signal))
-# print(transmit_signal)
-# chunk_size = 8000
-# num_chunks = int(np.ceil(len(transmit_signal) / chunk_size))
-# all_received = []
-
-# # radio transmission code goes here
-
-
-
-# s = P.decode_message(transmit_signal, sps, N)   #change back to recieve_signal
-# s = P.detect_pam_symbol(N, s)
-# print(f"Same symbols received? {s == symb}")
-
-# b = P.symbol_to_bits(N, s)
-
-
-
-# print(f"Same signal received? {b == bit_array}")
-
-
-
-# '''
-# shift bits to create voice changer effect
-# convert bits back to audio
-# apply low pass filter to reduce noise in the audio
-# '''
-
-# def bits_to_audio(bit_array, levels):
-#     # Convert each 8-bit string back to int
-#     int_levels = np.array([int(b, 2) for b in bit_array], dtype=np.int32)
-
-#     # Map from [0, 255] → [-1, 1] (inverse of quantization step)
-#     audio = (int_levels / (levels - 1)) * 2 - 1
-
-#     return audio.astype(np.float32)
-
-
-
-
-# levels = 256  # bits = 8
-# reconstructed_audio = bits_to_audio(b, levels) 
-
-
-# # '''
-# # pitch shift
-# # '''
-# # import librosa
-
-
-# # # ask the user for the pitch shift step
-# # while True:
-# #   user_input = input("how many steps do you want the pitch to be shifted (ex. 13, -9 etc.): ")
-# #   try:
-# #     n_steps = int(user_input)
-# #     break
-# #   except ValueError:
-# #     print("Invalid input. Please enter an integer number.")
-
-
-# # shifted = librosa.effects.pitch_shift(reconstructed_audio, sr=44100, n_steps=n_steps)
-
-         
-# # # Playback the audio
-# # print("Playing recieved audio...")
-# # sd.play(shifted, samplerate=44100)
-# # sd.wait()
 
