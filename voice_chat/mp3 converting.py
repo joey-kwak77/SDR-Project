@@ -101,14 +101,14 @@ listener.join()
 if recorded_audio:
     audio_clip = np.concatenate(recorded_audio, axis=0).flatten()
     # bit_array = audio_to_bits(audio_clip, levels)
-    bit_strs = audio_to_bits(audio_clip, levels)
-    bit_array = np.array([int(b) for bits in bit_strs for b in bits], dtype=int)
-    print("Length of bit array: ", len(bit_array))
-    # Output
-    print(f"\nRecorded {len(audio_clip)/fs:.2f} seconds of audio")
-    print(f"Total bits captured: {len(bit_array)*bits}")
-    print("First 10 audio samples as bits:")
-    print(bit_array[:20])
+    # bit_strs = audio_to_bits(audio_clip, levels)
+    # bit_array = np.array([int(b) for bits in bit_strs for b in bits], dtype=int)
+    # print("Length of bit array: ", len(bit_array))
+    # # Output
+    # print(f"\nRecorded {len(audio_clip)/fs:.2f} seconds of audio")
+    # print(f"Total bits captured: {len(bit_array)*bits}")
+    # print("First 10 audio samples as bits:")
+    # print(bit_array[:20])
 else:
     print("\nNo audio was recorded. Make sure you press and hold the spacebar while the plot window is open.")
 
@@ -120,21 +120,15 @@ encoder.set_bit_rate(128)        # in kbps
 encoder.set_in_sample_rate(44100)
 encoder.set_channels(1)
 # Encode & flush:
-mp3_data = encoder.encode(bit_array)
+mp3_data = encoder.encode(audio_clip)
 mp3_data += encoder.flush()
-# Write out:
-with open("output.mp3", "wb") as f:
-    f.write(mp3_data)
 
-# convert to compressed bits
-with open("output.mp3", "rb") as f:
-    compressed_bits = f.read()
+# Convert MP3 bytes → array of bits
+byte_arr   = np.frombuffer(mp3_data, dtype=np.uint8)
+bit_array  = np.unpackbits(byte_arr, bitorder='big')
 
-# unpack to a string of "0"/"1"
-compressed_bit_str = "".join(f"{b:08b}" for b in compressed_bits)
-#—or— NumPy for large streams
-compressed_bit_array = np.unpackbits(np.frombuffer(compressed_bits, dtype=np.uint8), bitorder="big")
-
+print(f"Total bits: {bit_array.size}  (i.e. {bit_array.size/8:.1f} bytes)")
+print("First 32 bits:", bit_array[:32])
 
 # def compression(bits) -> str:
 #     '''
@@ -234,7 +228,7 @@ P = Pam()
 # print(len(symb))
 
 constellation = get_qam_constellation(M=N)
-symb, padding = qam_mapper(compressed_bit_array,constellation)
+symb, padding = qam_mapper(bit_array,constellation)
 
 
 transmit_signal = P.create_message(symb, sps)
